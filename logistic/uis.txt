@@ -1,0 +1,20 @@
+
+Description of Variables in the UMARU IMPACT Study 
+Described in Section 1.6.4 page 26
+
+Variable	Description			Codes/Values		Name
+1		Identification Code		1-575			ID
+2		Age at Enrollment		Years			AGE			
+3		Beck Depression Score at 	0.000-54.000		BECK
+		Admission
+4		IV Drug Use History 		1 = Never, 		IVHX
+		at Admission 			2 = Previous 3 = Recent 
+5		Number of Prior Drug 		0-40			NDRUGTX
+		Treatments 
+6		Subject's Race			0 = White, 1 = Other	RACE
+7		Treatment Randomization 	0 = Short, 1 = Long	TREAT
+		Assignment 
+8		Treatment Site			0 = A, 1 = B		SITE
+9		Remained Drug Free 		1 = Remained Drug Free	DFREE
+		for 12 Months 			0 = Otherwise
+

@@ -1,0 +1,26 @@
+
+Code Sheet for the Variables in the Mammography Experience Study 
+Described in Section 8.1.2 page 264.
+
+Variable	Description					Codes/Values		Name
+1		Identification Code				1-412			OBS
+2		Mammograph Experience				0 = Never		ME
+								1 = Within One Yea
+								2 = Over One Year Ago
+3		"You do not need a mamogram unless		1 = Strongly Agree	SYMPT
+		you develop symptoms"				2 = Agree
+								3 = Disagree
+								4 = Stongly Disagree
+4		Perveived benefit of mammography*		5 - 20			PB
+5		Mother or Sister with a history 		0 = No, 1 = Yes		HIST
+		of breast cancer 
+6		"Has anyone taught you how to 			0 = No, 1 = Yes		BSE
+		examine your own breasts: that is BSE"
+7		"How likelyis it that a mamogram 		1= Not likely		DETC
+		could find a new case of 			2 = Somewhat likely 
+		breast cancer"					3 = Very likely
+
+*The variable PB is the sum of five scaled responses, each on a four point scale.  
+A low value is indicative of a woman with strong agreement with the benefits of mammography.
+
+

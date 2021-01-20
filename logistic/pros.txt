@@ -1,0 +1,22 @@
+
+
+Code Sheet for the Prostate Cancer Study Described 
+in Section 1.6.3 page 25
+
+Variable	Description			Codes/Values			Name
+1		Identification Code		1 - 380				ID
+2		Tumor Penetration of 		0 = No Penetration, 		CAPSULE
+		Prostatic Capsule		1 = Penetration
+3		Age 				Years				AGE
+4		Race				1= White, 2 = Black		RACE
+5		Results of the Digital 		1 = No Nodule			DPROS
+		Rectal Exam 			2 = Unilobar Nodule (Left)
+						3 = Unilobar Nodule  (Right)
+						4 = Bilobar Nodule
+6		Detection of Capsular 		1 = No, 2 = Yes			DCAPS
+		Involvement in Rectal Exam 
+7		Prostatic Specific 		mg/ml				PSA
+		Antigen Value
+8		Tumor Volume Obtained 		cm3				VOL
+		from Ultrasound
+9		Total Gleason Score		0 - 10 				GLEASON

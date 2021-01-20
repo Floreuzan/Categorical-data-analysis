@@ -1,0 +1,8 @@
+Code Sheet for the Chd-Age data in Table 1.1 page 3 of 
+Applied Logistic Regression:Second Edition
+
+Variable		Name		Values
+     1		Identification Code	1-100
+     2		Age			Years
+     3		Evidence of Coronary	
+		Heart Disease		0 = No, 1 = Yes 

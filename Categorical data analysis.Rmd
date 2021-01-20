@@ -1,0 +1,759 @@
+---
+title: "STAT697FINALEXAM"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, include=FALSE}
+setwd("C:/Users/flore/Documents/Fall 2019 - Spring 2020/STAT697/STAT697HW")
+
+table = read.table("icu.dat", header = F)
+dimnames(table)[[2]] <- c("ID", "STA", "AGE", "SEX", "RACE", "SER", "CAN", "CRN", "INF", "CPR", "SYS", "HRA", "PRE", "TYP", "FRA", "PO2", "PH", "PCO", "BIC", "CRE", "LOC")
+table$RACE <- as.factor(table$RACE)
+table$LOC <- as.factor(table$LOC)
+```
+
+
+
+## Question 1
+
+Write down the equation for the logistic regression model of STA (Vital Status: 0 = Lived,1= Died) on AGE(Years).
+
+```{r, echo=FALSE}
+mod1 <- glm(STA ~ AGE, family=binomial, data=table)
+summary(mod1)
+```
+
+
+
+
+The prediction equation  is:
+
+$$
+logit(\hat{\pi}) =  -3.05851 + 0.02754*AGE 
+$$
+
+$$
+\pi(AGE) = \frac{exp(-3.05851 + 0.02754*AGE_i)}{1 + exp(-3.05851 + 0.02754*AGE_i)}
+$$
+
+Write down the log likelihood for the logistic regression model and the equation for solving the maximum likelihood estimates (MLE) of the parameters.
+
+
+Log-likelihood for the logistic regression model:
+
+$$
+l(a,b) = \sum^{200}_{i=1} y_ilog(\pi) + (1-y_i)log(1-\pi) = \sum^{200}_{i=1} y_i log(\frac{\pi}{1-\pi}) + log(1-\pi)
+$$
+
+$$
+log(\frac{\pi}{1-\pi}) = a + b*AGE_i
+$$
+$$ 
+ 1-\pi = 1- \frac{exp(a + b*AGE_i)}{1 + exp(a + b*AGE_i)} = (1 + exp(a + b*AGE_i))^{-1}
+$$ 
+ 
+$$
+log(1-\pi) = log((1 + exp(a + b*AGE_i))^{-1})= -3.05851 + 0.02754*AGE_i
+$$ 
+$$ 
+l(a, b)= \sum^{200}_{i=1} STA_i(a + b*AGE_i) - log(1+ exp(a + b*AGE_i))
+$$ 
+ 
+$$ 
+l(a, b)= \sum^{200}_{i=1} STA_i(-3.05851 + 0.02754*AGE_i) - log(1+ exp(-3.05851 + 0.02754*AGE_i))
+$$
+
+Equation for solving the MLE of the parameters:
+
+$$
+\frac{\partial l(a, b)}{\partial a} = \sum^{200}_{i=1} (STA_i - \pi) = 0
+$$
+$$
+\frac{\partial l(a, b)}{\partial b} = \sum^{200}_{i=1} AGE_i(STA_i-\pi) = 0
+$$
+
+## Question 2
+
+We can observe the scatterplot of STA versus AGE
+
+```{r, echo=FALSE}
+library(ggplot2)
+plot <- ggplot( data= table) + 
+  geom_point(mapping = aes(x= AGE, y = STA)) +
+      ggtitle('Scatter plot of the Vital status over Age') +
+         theme(plot.title = element_text(hjust = 0.5))
+
+plot
+```
+
+
+
+## Question 3
+
+We compute the STA mean over subjects within each AGE interval:
+
+
+```{r, include = FALSE}
+n<-numeric(8)
+STAsum <-numeric(8)
+
+for(i in 1:200){
+  if (table$AGE[i] < 25){
+    n[1] <- n[1] +1
+    STAsum[1] <- STAsum[1] +table$STA[i]
+  }
+  else if (24 < table$AGE[i] && table$AGE[i] < 35){
+    n[2] <- n[2] +1
+    STAsum[2] <- STAsum[2] +table$STA[i]
+  }
+  else if (34 < table$AGE[i] && table$AGE[i] < 45){
+    n[3] <- n[3] +1
+    STAsum[3] <- STAsum[3] +table$STA[i]
+  }
+  else if (44 < table$AGE[i] && table$AGE[i] < 55){
+    n[4] <- n[4] +1
+    STAsum[4] <- STAsum[4] +table$STA[i]
+  }
+  else if (54 < table$AGE[i] && table$AGE[i] < 65){
+    n[5] <- n[5] +1
+    STAsum[5] <- STAsum[5] +table$STA[i]
+  }
+  else if (64 < table$AGE[i] && table$AGE[i] < 75){
+    n[6] <- n[6] +1
+    STAsum[6] <- STAsum[6] +table$STA[i]
+  }
+  else if (74 < table$AGE[i] && table$AGE[i] < 85){
+    n[7] <- n[7] +1
+    STAsum[7] <- STAsum[7] +table$STA[i]
+  }
+  else if (table$AGE[i] > 84){
+    n[8] <- n[8] +1
+    STAsum[8] <- STAsum[8] +table$STA[i]
+  }
+  
+}
+n  # number of people per category
+STA_mean = STAsum/n
+STA_mean
+```
+
+The number of people per interval is:
+
+26  8 11 25 39 50 30 11
+
+and the percentage of people who died per interval is:
+
+0.0769 0 0.1818 0.2 0.2051 0.18 0.3 0.4545
+
+We plot these values of mean STA versus the midpoint of the AGE interval:
+
+```{r, echo=FALSE}
+Age<-c(19.5, 29.5, 39.5, 49.5, 59.5, 69.5, 79.5, 89.5)
+library(ggplot2)
+plot <- ggplot( data= table) + 
+  geom_point(mapping = aes(x= AGE, y = STA, col = 'black')) +
+      ggtitle('Vital Status over Age') +
+         theme(plot.title = element_text(hjust = 0.5)) +
+  geom_point(aes(x = Age[1], y = STA_mean[1], col = 'green')) +
+  geom_point(aes(x = Age[2], y = STA_mean[2], col = 'green')) +
+  geom_point(aes(x = Age[3], y = STA_mean[3], col = 'green')) +
+  geom_point(aes(x = Age[4], y = STA_mean[4], col = 'green')) +
+  geom_point(aes(x = Age[5], y = STA_mean[5], col = 'green')) +
+  geom_point(aes(x = Age[6], y = STA_mean[6], col = 'green')) +
+  geom_point(aes(x = Age[7], y = STA_mean[7], col = 'green')) +
+  geom_point(aes(x = Age[8], y = STA_mean[8], col = 'green'))
+plot+
+    scale_color_identity(breaks = c('black', 'green'),
+                       labels = c('Response', 'Group Means'),
+                       guide = 'legend')
+```
+
+
+## Question 4
+
+We obtain the MLE of the parameters of mean STA versus the midpoint of the AGE interval.
+
+recall:STA is the Vital Status: 0 = Lived,1= Died, AGE is in Years
+
+
+```{r, echo=FALSE}
+mod2 <- glm(STAsum/n ~ Age, family=binomial, data=table, weights = n)
+summary(mod2)
+
+```
+
+The prediction equation  is:
+
+$$
+logit(\hat{\pi}) =  -3.08609 + 0.02779*Age
+$$
+
+
+```{r, echo=FALSE}
+table$mod <- exp(-3.059 + 0.0275*table$AGE) / (1 + exp(-3.059 + 0.0275*table$AGE))
+```
+
+We plot the estimated probabilities of the STA mean over subjects within each AGE interval:
+
+```{r, echo=FALSE}
+plot + geom_point(aes(x=AGE, y= mod, col = 'red'), data = table) +
+      scale_color_identity(breaks = c('black', 'green','red'),
+                       labels = c('Response', 'Group Means', 
+                                  'Estimated Probability'),
+                       guide = 'legend')
+
+```
+
+
+Does it appear plausible that the logit of the survival probability is linear in AGE?
+
+Yes, it visually appears plausible.
+
+
+## Question 5
+
+
+1st part
+
+We compute the STA mean over subjects within each SYS interval:
+
+
+```{r, include=FALSE}
+
+Sys<- c(seq(from=min(table$SYS),to=max(table$SYS),by= (max(table$SYS) - min(table$SYS))/8 ))
+
+n<-numeric(8)
+STAsum <-numeric(8)
+
+for(i in 1:200){
+  if (Sys[1] <= table$SYS[i] && table$SYS[i] < Sys[2]){
+    n[1] <- n[1] +1
+    STAsum[1] <- STAsum[1] +table$STA[i]
+  }
+  if (Sys[2] <= table$SYS[i] && table$SYS[i] < Sys[3]){
+    n[2] <- n[2] +1
+    STAsum[2] <- STAsum[2] +table$STA[i]
+  }
+  if (Sys[3] <= table$SYS[i] && table$SYS[i] < Sys[4]){
+    n[3] <- n[3] +1
+    STAsum[3] <- STAsum[3] +table$STA[i]
+  }
+  if (Sys[4] <= table$SYS[i] && table$SYS[i] < trunc((Sys[4]+Sys[5])/2) ){
+    n[4] <- n[4] +1
+    STAsum[4] <- STAsum[4] +table$STA[i]
+  }
+  if (trunc((Sys[4]+Sys[5])/2) <= table$SYS[i] && table$SYS[i] < Sys[5]){
+  n[5] <- n[5] +1
+  STAsum[5] <- STAsum[5] +table$STA[i]
+  }
+  if (Sys[5] <= table$SYS[i] && table$SYS[i] < Sys[6]){
+  n[6] <- n[6] +1
+  STAsum[6] <- STAsum[6] +table$STA[i]
+  }
+  if (Sys[6] <= table$SYS[i] && table$SYS[i] < Sys[7]){
+  n[7] <- n[7] +1
+  STAsum[7] <- STAsum[7] +table$STA[i]
+  }
+
+  if (Sys[7] <= table$SYS[i]) {
+    n[8] <- n[8] +1
+    STAsum[8] <- STAsum[8] +table$STA[i]
+  }
+}
+n  # number of people per category
+STA_mean = STAsum/n
+STA_mean
+```
+
+The number of people per interval is:
+
+4 14 46 38 39 41 12  6
+
+and the percentage of people who died per interval is:
+
+0.75 0.6429 0.1087 0.2105 0.2051 0.1219 0.0833 0.1667
+
+
+
+We obtain the MLE of the parameters of mean STA versus the midpoint of the SYS interval.
+
+
+
+
+```{r, echo=FALSE}
+mod <- glm(STA ~ SYS, family=binomial, data=table)
+summary(mod)
+```
+
+The prediction equation  is:
+
+$$
+logit(\hat{\pi}) =  0.777195 + -0.017019*Sys
+$$
+We also transfrom the data taking the log:
+
+```{r, echo=FALSE}
+log_mod <-glm(STA ~ log(SYS), family=binomial, data=table)
+summary(log_mod)
+```
+
+
+The prediction equation  is:
+
+$$
+logit(\hat{\pi}) =  9.3131 + -2.2250*Sys
+$$
+
+```{r, echo=FALSE}
+table$mod <- exp(0.777195 -0.017019*table$SYS) / (1 + exp(0.777195 -0.017019*table$SYS))
+table$log_mod <- exp(9.3131 -2.2250*log(table$SYS)) / (1 + exp(9.3131 -2.2250*log(table$SYS)))
+```
+
+
+We plot  scatterplot of STA versus SYS, the mean STA versus the midpoint of the SYS interval and the estimated probabilities.
+
+```{r, echo=FALSE, warning=FALSE}
+Sys <- c(36, 63.5, 91, 118.5, 132, 146 ,173.5, 201, 256)
+Sys <- c( (Sys[1]+Sys[2])/2, (Sys[2]+Sys[3])/2,  (Sys[3]+Sys[4])/2, (Sys[4]+Sys[5])/2, (Sys[5]+Sys[6])/2, (Sys[6]+Sys[7])/2, (Sys[7]+Sys[8])/2, (Sys[8]+Sys[9])/2 )
+
+
+plot <- ggplot(data= table) + 
+  geom_point(mapping = aes(x= SYS, y = STA, col = 'black')) +
+      ggtitle('Vital Status over Systolic Blood Pressure') +
+         theme(plot.title = element_text(hjust = 0.5)) +
+  geom_point(aes(x = Sys[1], y = STA_mean[1], col = 'green')) +
+  geom_point(aes(x = Sys[2], y = STA_mean[2], col = 'green')) +
+  geom_point(aes(x = Sys[3], y = STA_mean[3], col = 'green')) +
+  geom_point(aes(x = Sys[4], y = STA_mean[4], col = 'green')) +
+  geom_point(aes(x = Sys[5], y = STA_mean[5], col = 'green')) +
+  geom_point(aes(x = Sys[6], y = STA_mean[6], col = 'green')) +
+  geom_point(aes(x = Sys[7], y = STA_mean[7], col = 'green')) +
+  geom_point(aes(x = Sys[8], y = STA_mean[8], col = 'green'))
+
+plot + geom_point(aes(x=SYS, y= mod, col = 'red'), data = table) +
+  geom_point(aes(x=SYS, y= log_mod, col = 'orange'), data = table) +
+      scale_color_identity(breaks = c('black', 'green','red', 'orange'),
+                       labels = c('Response', 'Group Means', 
+                                  'Estimated Probability', 'log transformation'),
+                       guide = 'legend')
+```
+
+2nd part
+
+We compute the STA mean over subjects within each HRA interval:
+
+```{r, include=FALSE}
+
+Hra<- c(seq(from=min(table$HRA),to=max(table$HRA),by= (max(table$HRA) - min(table$HRA))/8 ))
+
+n<-numeric(7)
+STAsum <-numeric(7)
+
+for(i in 1:200){
+  if (Hra[1] <= table$HRA[i] && table$HRA[i] < Hra[2]){
+    n[1] <- n[1] +1
+    STAsum[1] <- STAsum[1] +table$STA[i]
+  }
+  if (Hra[2] <= table$HRA[i] && table$HRA[i] < Hra[3]){
+    n[2] <- n[2] +1
+    STAsum[2] <- STAsum[2] +table$STA[i]
+  }
+  if (Hra[3] <= table$HRA[i] && table$HRA[i] < Hra[4]){
+    n[3] <- n[3] +1
+    STAsum[3] <- STAsum[3] +table$STA[i]
+  }
+  if (Hra[4] <= table$HRA[i] && table$HRA[i] < Hra[5]){
+    n[4] <- n[4] +1
+    STAsum[4] <- STAsum[4] +table$STA[i]
+  }
+  if (Hra[5] <= table$HRA[i] && table$HRA[i] < Hra[6]){
+  n[5] <- n[5] +1
+  STAsum[5] <- STAsum[5] +table$STA[i]
+  }
+  if (Hra[6] <= table$HRA[i] && table$HRA[i] < Hra[7]){
+  n[6] <- n[6] +1
+  STAsum[6] <- STAsum[6] +table$STA[i]
+  }
+  if (Hra[7] <= table$HRA[i]){
+  n[7] <- n[7] +1
+  STAsum[7] <- STAsum[7] +table$STA[i]
+  }
+}
+n  # number of people per category
+STA_mean = STAsum/n
+STA_mean
+```
+
+
+The number of people per interval is:
+
+8 29 68 42 29 19  5
+
+and the percentage of people who died per interval is:
+
+0.25 0.1724 0.2059 0.1667 0.2414 0.2105 0.2
+
+We obtain the MLE of the parameters of mean STA versus the midpoint of the HRA interval:
+
+
+```{r, echo=FALSE}
+mod <- glm(STA ~ HRA, family=binomial, data=table)
+summary(mod)
+```
+
+
+The prediction equation  is:
+
+$$
+logit(\hat{\pi}) =  -1.679129 + 0.002941*Hra
+$$
+
+
+
+```{r, echo=FALSE}
+table$mod <- exp(-1.679129 + 0.002941*table$HRA) / (1 + exp(-1.679129 +0.002941*table$HRA))
+```
+
+
+We plot  scatterplot of STA versus HRA, the mean STA versus the midpoint of the HRA interval and the estimated probabilities.
+
+
+```{r, echo=FALSE}
+#Hra<- c(39, 58.125,  77.25, 96.375, 115.5, 134.625, 153.75, 192)
+
+Hra <- c( (Hra[1]+Hra[2])/2, (Hra[2]+Hra[3])/2,  (Hra[3]+Hra[4])/2, (Hra[4]+Sys[5])/2, (Sys[5]+Sys[6])/2, (Sys[6]+Sys[7])/2, (Sys[7]+Sys[8])/2, (Sys[8]+Sys[9])/2)
+
+
+plot <- ggplot( data= table) + 
+  geom_point(mapping = aes(x= HRA, y = STA, col = 'black')) +
+      ggtitle('Vital Status over Heart Rate') +
+         theme(plot.title = element_text(hjust = 0.5)) +
+  geom_point(aes(x = Hra[1], y = STA_mean[1], col = 'green')) +
+  geom_point(aes(x = Hra[2], y = STA_mean[2], col = 'green')) +
+  geom_point(aes(x = Hra[3], y = STA_mean[3], col = 'green')) +
+  geom_point(aes(x = Hra[4], y = STA_mean[4], col = 'green')) +
+  geom_point(aes(x = Hra[5], y = STA_mean[5], col = 'green')) +
+  geom_point(aes(x = Hra[6], y = STA_mean[6], col = 'green')) +
+  geom_point(aes(x = Hra[7], y = STA_mean[7], col = 'green')) 
+
+plot + geom_point(aes(x=HRA, y= mod, col = 'red'), data = table) +
+        scale_color_identity(breaks = c('black', 'green','red'),
+                       labels = c('Response', 'Group Means', 
+                                  'Estimated Probability'),
+                       guide = 'legend')
+```
+
+
+What are the correct scales for SYS and HRA to enter the model?
+
+The correct scale for SYS seems to be the log scale. 
+
+HRA has a slope almost equal to zero. It seems to be that HRA is independent to STA. We will do further analysis in the following question.
+
+
+## Question 6
+
+We look at the MLE of the predictors when we include all of them:
+
+```{r, include=FALSE}
+full_mod <- glm(STA ~ AGE+SEX+RACE+SER+CAN+CRN+INF+CPR+SYS+HRA+PRE+TYP+FRA+PO2+PH+PCO+BIC+CRE+LOC, family=binomial, data=table)
+```
+
+
+```{r, echo=FALSE}
+summary(full_mod)
+```
+
+Looking at the summary of all the predictors included, we can see that the predictors: AGE, CAN, SYS, PRE, TYP, PCO and LOC seems to be significant.
+
+
+
+Using a model-buildigng strategy, we will select a logistic model for these predictors.
+
+
+
+1) Let's start with the backward selection:
+
+We begins with a complex model and sequentially removes terms. At each stage, it selects the term with the largerst p-value for removal. The process stops when any further deletion leads to a significantly poorer fit.
+
+
+
+```{r, include=FALSE}
+full_mod <- glm(STA ~ AGE+SEX+RACE+SER+CAN+CRN+INF+CPR+SYS+HRA+PRE+TYP+FRA+PO2+PH+PCO+BIC+CRE+LOC, family=binomial(link = logit), data=table)
+res <- step(full_mod, scope=list(lower = ~ 1, upper = formula(full_mod)), scale = 1, trace = F, direction = "backward")
+```
+
+
+```{r, echo=FALSE}
+res
+```
+
+2) forward selection 
+
+At each stage, it selects the term giving the greatest improvement in fit (the term with the smallest p-value). The process stops when further additions do not significantly improve the fit.
+
+
+```{r, include=FALSE}
+base_mod <- glm(STA ~ 1, family=binomial, data=table)
+res <- step(base_mod, scope=list(lower = ~ 1, upper =  formula(full_mod)), scale = 1, trace = F, direction = "forward")
+```
+
+
+```{r, echo=FALSE}
+res
+```
+
+
+3) bestgltm with AIC
+
+
+
+```{r, include=FALSE}
+library(leaps)
+library(bestglm)
+
+#prepare the data
+data <- cbind( "AGE" = table$AGE, "SEX" = table$SEX, "RACE" = table$RACE, "SER" = table$SER, "CAN" = table$CAN, "CRN" = table$CRN, "INF" = table$INF, "CPR" = table$CPR, "SYS" = table$SYS, "HRA" = table$HRA,"PRE" = table$PRE, "TYP" = table$TYP, "FRA" = table$FRA, "PO2" = table$PO2, "PH" = table$PH, "PCO" = table$PCO, "BIC" = table$BIC, "CRE" = table$CRE, "LOC" = table$LOC)
+
+y<-table$STA
+Xy <-as.data.frame(cbind(data, y))
+```
+
+
+```{r, echo=FALSE}
+bestglm(Xy, IC = "AIC")
+```
+
+
+
+4) bestglm with BIC
+```{r, echo=FALSE}
+bestglm(Xy, IC = "BIC")  
+```
+
+
+Sum up:
+
+
+1) backward selection: STA ~ AGE + CAN + SYS + TYP + PH + PCO + LOC (7 predictors)
+
+2) forward selection: STA ~ LOC + TYP + AGE + CAN + SYS (5 predictords)
+
+3) bestglm with AIC: STA ~ AGE + CAN + SYS + PRE + TYP + PH + PCO + LOC (8 predictors)
+
+4) bestglm with BIC: STA ~ AGE + TYP + LOC (3 predictors)
+
+
+
+```{r, include=FALSE}
+full_mod <- glm(STA ~ AGE+SEX+RACE+SER+CAN+CRN+INF+CPR+SYS+HRA+PRE+TYP+FRA+PO2+PH+PCO+BIC+CRE+LOC, family=binomial, data=table)
+back_mod <- glm(STA ~ AGE + CAN + SYS + TYP + PH + PCO + LOC, family=binomial, data=table) 
+for_mod <- glm(STA ~ AGE + CAN+SYS+TYP+LOC, family=binomial, data=table)
+best_AIC_mod <- glm(STA ~ AGE + CAN + SYS + PRE + TYP + PH + PCO + LOC, family=binomial, data=table)
+best_BIC_mod <- glm(STA ~ AGE + TYP + LOC, family=binomial, data=table)
+```
+
+We test if the best_BIC_mod fits as well as the full model doing anova. ( we test this model first because it is composed with the fewest number of predictors with 3 predictors.)
+
+
+```{r, echo=FALSE}
+anova(best_BIC_mod, full_mod)
+```
+
+
+
+```{r, include=FALSE}
+1 - pchisq(29.705, 17)
+```
+
+p-value(29.705, 17) = 0.0285527
+
+Because the p - value < 0.05, we reject the null hypothesis. Therefore, we conclude that the best_BIC_mod does not fit as well as the full model.
+
+We then test if the for_mod fits as well as the full model.
+
+
+```{r, echo=FALSE}
+anova(for_mod, full_mod)
+```
+
+```{r, include=FALSE}
+1 - pchisq(16.273, 15)
+```
+
+p-value(16.273, 15) = 0.3641436
+
+The p-value is > 0.05 so we do not reject the null hypothesis. Therefore, we conclude that the for_mod fits as well as the full model.
+
+So with the forward selection, we can select the model: STA ~ AGE + CAN + SYS + TYP + LOC.
+
+## Question 7
+
+
+I -  goodness of fit 
+
+
+
+  1) classification table
+
+Let's evaluate the confusion matrix with a threshold = 0.5.
+
+
+```{r, echo=FALSE}
+threshold=0.5
+predicted_values<-ifelse(predict(for_mod,type="response")>threshold,1, 0)
+actual_values<-for_mod$y
+conf_matrix<-table(actual_values, predicted_values)
+conf_matrix
+```
+
+```{r, include=FALSE}
+17/(17+23)
+157/(157+3)
+```
+
+The sensitivity is 0.425 which means that the 'true positive rate' is 42.5% i.e. the probability of predicting that a patient will live (STA=0) after his admission to the ICU is .425 when the patient actually survives.
+
+The specificity  is 0.98125 which means that the 'true negative rate' is 98% i.e. the probability of predicting that a patient will die (STA=1) after his admission to teh ICU is .98 when the patient actually dies.
+
+With a threshold = 0.5, the specificity is better than the sensitivity.
+
+
+Let's evaluate the confusion matrix with a threshold = threshold= mean(STA).
+
+
+```{r, echo=FALSE}
+threshold=mean(table$STA)
+predicted_values<-ifelse(predict(for_mod,type="response")>threshold,1, 0)
+actual_values<-for_mod$y
+conf_matrix<-table(actual_values, predicted_values)
+conf_matrix
+```
+
+```{r, include=FALSE}
+30/(30+10)
+122/(122+38)
+```
+
+The sensitivity is 0.75 which means that the 'true positive rate' is 75% i.e. the probability of predicting that a patient will live (STA=0) after his admission to the ICU is .75 when the patient actually survives.
+
+The specificity  is 0.7625 which means that the 'true negative rate' is 76% i.e. the probability of predicting that a patient will die (STA=1) after his admission to teh ICU is .76 when the patient actually dies.
+
+With this threshold, the sensitivity and the specificity are equivalent.
+
+
+
+  2) ROC Curve
+  
+We can evaluate the model with the ROC Curve:  
+
+
+```{r, include=FALSE}
+library(ROCR)
+rocplot=function(pred, truth, ...){
+  predob = prediction(pred, truth)
+  perf = performance(predob, "tpr", "fpr")
+  plot(perf,...)}
+```
+
+
+```{r, echo=FALSE}
+rocplot(predict(for_mod), for_mod$y)
+```
+
+
+```{r, include=FALSE}
+predob = prediction(predict(for_mod), for_mod$y)
+performance(predob, "auc")
+```
+
+In a Receiver Operating Characteristic (ROC) curve the true positive rate (Sensitivity) is plotted in function of the false positive rate (100-Specificity) for different cut-off points. This ROC curve is used to show in a graphical way the trade-off between sensitivity and specificity for every possible cut-off for a test or a combination of tests. The closer the curve follows the left-hand border and then the top border of the ROC space, the more accurate the test.
+
+
+Concordance index = Area under curve = 0.8704687
+
+Therefore, the proportion of pairs of data whose fitted values are pairwise concordant is higher than 87% which indicates that this model fits the data adequately and predict accordingly.
+
+
+  3) Hosmer–Lemeshow test
+  
+```{r, include=FALSE}
+library(ResourceSelection)
+hl <- hoslem.test(for_mod$y, fitted(for_mod), g=10)
+```
+
+
+```{r, echo=FALSE}
+hl
+```
+  
+This gives p - value = 0.649 > 0.05, indicating no evidence of poor fit.
+  
+  
+II - influential statistics  
+
+
+```{r, include=FALSE}
+#Influence Diagnostics 
+influence.measures(for_mod)$is.inf
+```
+
+We do not observe any value where the Cook's distance and the leverage are influential. Therefore, we may not have any influential points in the data.
+
+
+
+
+## Question 8
+
+Looking at the MLE of the model we selected with forward selection, we have:
+
+```{r, echo=FALSE}
+summary(for_mod)
+```
+
+
+1) Find the odds ratio of survival for a 40 year old subject compared to a 50 year old subject, controlling for other factors and its 95% confidence interval. 
+
+
+```{r, include=FALSE}
+exp(3.832e-02*40 - 3.832e-02*50)
+CI <- c(exp(-0.3832 - 1.96*1.294e-02*10), exp(-0.3832 + 1.96*1.294e-02*10))
+CI
+```
+
+The odds ratio of survival (STA) for a 40 year old subject compared to a 50 year old subject, controlling for other factors is exp(3.832e-02*40 - 3.832e-02*50) = 0.6816766.
+
+The 95% Confidence interval is [exp(-0.3832 - 1.96*1.294e-02*10), exp(-0.3832 + 1.96*1.294e-02*10)] = [0.5289698, 0.8784678].
+
+
+2)  Find the odds ratio of survival and its 95% confidence interval for a subject who was in coma at ICU admission and a subject in deep stupor at admission, controlling for other factors.  
+
+recall: LOC: Level of Consciousness 	0 = No Coma or Deep Stupor,	LOC at ICU Admission 	1 = Deep Stupor, 2= Coma
+
+Because we are comparing LOC=2 with LOC=1, we change the baseline for LOC=2.
+
+
+```{r,include=FALSE}
+#define LOC as a factor with level 2 as the baseline
+table$LOC <- factor(table[,21], levels=c("2", "1", "0"))
+fit <- glm(table[,2]~AGE+CAN+SYS+TYP+LOC, family="binomial",data=table) 
+summary(fit)
+```
+
+It turns out there is quasi complete separation for the LOC variable at level 1 (deep stupor). 
+
+The the odds ratio of survival for a subject who was in coma at ICU admission and a subject in deep stupor at admission, controlling for other factors. is exp(1.913e+01) = 203260710.
+
+```{r, include = FALSE}
+
+#Profile likelihood CI
+confint(fit)
+```
+
+
+The 95% Confidence interval is [-56.15217480, 420.351020370].

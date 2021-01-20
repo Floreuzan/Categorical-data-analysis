@@ -1,0 +1,32 @@
+
+Description of Variables in the Benign Breast Disease 1-3 Matched Case-Control Study Described in
+ Section 7.5 page 244.
+
+Variable	Description			Codes/Values		Name
+1		Stratum				1 - 50			STR
+2		Observation within Stratum	1 = Case,		OBS
+						2 - 4 = Control 
+3		Age at Interview		Years			AGMT
+4		Final Diagnosis 		1 = Case, 0 = Control	FNDX
+5		Highest Grade in School		5 - 20			HIGD
+6		Degree				0 = None		DEG
+						1 = High School
+						2 = Jr. College
+						3 = College
+						4 = Masters
+						5 = Doctoral
+7		Regular Medical Check-ups	1 = Yes, 2 = No		CHK
+8		Age at First Pregnancy		Years			AGP1
+9		Age at Menarche			Years			AGMN
+10		No. of Stillbirths, 		0 - 7			NLV
+		Miscarriages etc. 
+11		Number of Live Births		0 - 11			LIV
+12		Weight of the Subject 		Pounds			WT
+		At Interview
+13		Age at Last Menstrual Period	Years			AGLP
+14		Marital Status			1 = Married		MST
+						2 = Divorced
+						3 = Separated
+						4 = Widowed
+						5 = Never Married
+
